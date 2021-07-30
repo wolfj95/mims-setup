@@ -23,6 +23,11 @@ function installpipandpython() {
 	python --version
 }
 
+function installjupyter() {
+    # install jupyter notebooks
+    python -m pip install jupyter
+}
+
 function changeubuntupath() {
 	# changes default path of Ubunutu 
 	printf "What is your Windows Username? (This is case sensitive):  \n"
@@ -80,6 +85,9 @@ aptupdate
 
 printf "${BLUE}--- Installing pip and Python...${NC}\n"
 installpipandpython
+
+printf "${BLUE}--- Installing Jupyter...${NC}\n"
+installjupyter
 
 printf "${BLUE}--- Updating bash profile...${NC}\n"
 changeubuntupath

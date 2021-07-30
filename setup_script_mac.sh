@@ -115,6 +115,29 @@ function install_brew_package {
     return 0
 }
 
+function install_pip_package {
+    printf "${CLEAR_LINE}🔨  ${BLUE}Installing $1...${NC}"
+    if ! command -v $1 > /dev/null; then
+        pip3 install $1 &> /dev/null
+
+    fi
+    version=$( $1 --version | sed -nEe 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' | head -n 1 )
+    vercomp $version $2 
+    if [[ $? == 2 ]]; then
+        pip3 install --upgrade $1 &> /dev/null
+        version=$( $1 --version | sed -nEe 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' | head -n 1 )
+        vercomp $version $2 
+        if [[ $? == 2 ]]; then
+            printf "${CLEAR_LINE}┌────── ${YELLOW}Output from $1 version request: %s${NC}\n" "$version"
+            printf "│       ${YELLOW}Expected version $2 or higher. Please ask an instructor for help. ${NC}\n"
+            read -p "│       Continue? (Y/N): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
+            printf "🔨  ${BLUE}Installing $1...${NC}"
+            return 1
+        fi
+    fi
+    return 0
+}
+
 vercomp () {
     if [[ $1 == $2 ]]
     then
@@ -190,6 +213,17 @@ if [ $STATUS == 0 ] ; then
     printf "${CLEAR_LINE}👍  ${GREEN}Brew packages installed!${NC}\n"
 else
     printf "${CLEAR_LINE}✋  ${YELLOW}Some Brew packages may not have installed properly.${NC}\n"
+fi
+
+printf "🔨  ${BLUE}Installing pip packages...${NC}"
+STATUS=0
+if ! install_pip_package jupyter 0.0 ; then
+    STATUS=1
+fi
+if [ $STATUS == 0 ] ; then
+    printf "${CLEAR_LINE}👍  ${GREEN}pip packages installed!${NC}\n"
+else
+    printf "${CLEAR_LINE}✋  ${YELLOW}Some pip packages may not have installed properly.${NC}\n"
 fi
 
 printf "${PURPLE}Your computer is configured! Please restart Terminal. ${NC}\n"
